@@ -10,7 +10,7 @@ class Workout() : RealmObject {
     @PrimaryKey
     var id = RealmUUID.random()
     var type: String? = null
-    var weight: Double? = null
+    var weight: Double = 0.0
     var reps: Int = 0
     var sets: Int = 0
 }

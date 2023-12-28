@@ -59,13 +59,14 @@ class Overseer() : ViewModel() {
 
             )
             copyToRealm(WorkoutLists().apply {
-                exerciseTypes.addAll(testNames)
-                exerciseCategories.addAll(testCategories)
+//                exerciseTypes.addAll(testNames)
+                exerciseCategories.addAll(testCategories.distinct())
             })
-            for (i in 1..testNames.size) {
+            for (i in testNames.indices) {
                 copyToRealm(Exercise().apply {
                     type = testNames[i]
                     category = testCategories[i]
+                    if (testNames[i]=="Pushups") isBodyweight = true
                 })
             }
         }
@@ -74,20 +75,7 @@ class Overseer() : ViewModel() {
 
     fun getExercises(onResults: (List<Exercise>) -> Unit) {
         scope.launch {
-            realm.query<Exercise>().asFlow().collect {
-                resultsChange ->
-//                var msg = "["
-//                for (item in resultsChange.list) {
-//                    msg += "${item.type}, "
-//                }
-//                msg += "]"
-//                Log.d("TGT", msg)
-                if (resultsChange is UpdatedResults) {
-                    Log.d("TGT",
-                        "Changes:" +
-                                "\n\t${resultsChange.changes}"
-                    )
-                }
+            realm.query<Exercise>().asFlow().collect { resultsChange ->
                 onResults(resultsChange.list)
             }
         }
@@ -102,7 +90,28 @@ class Overseer() : ViewModel() {
         }
     }
 
-    fun addExercise(exercise: Exercise, onException: ()->Unit) {
+//    fun getExerciseTypes(onTypesChanged: (newTypes: Set<String>) -> Unit) {
+//        scope.launch {
+//            val lists = realm.query<WorkoutLists>().first().find()!!
+//            lists.exerciseTypes.asFlow().collect {
+//                listChange ->
+//                onTypesChanged(listChange.set)
+//            }
+//
+//        }
+//    }
+
+    fun getExerciseCategories(onCategoriesChanged: (newCategories: Set<String>)->Unit) {
+        scope.launch {
+            val lists = realm.query<WorkoutLists>().find().first()
+            lists?.exerciseCategories?.asFlow()?.collect {
+                listChange ->
+                onCategoriesChanged(listChange.set)
+            }
+        }
+    }
+
+    fun addExercise(exercise: Exercise, newType: String, newCategory: String, onException: ()->Unit) {
         scope.launch {
             realm.write {
                 try {
@@ -110,6 +119,8 @@ class Overseer() : ViewModel() {
                 } catch (e: IllegalArgumentException ) {
                     onException()
                 }
+                val lists = realm.query<WorkoutLists>().find().first()
+                findLatest(lists)?.exerciseCategories?.add(newCategory)
             }
         }
     }
