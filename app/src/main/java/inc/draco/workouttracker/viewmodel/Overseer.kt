@@ -41,7 +41,7 @@ class Overseer() : ViewModel() {
                 "Knee Extensions",
                 "Abs",
                 "Arm Curls",
-                "Arm Extension",
+                "Arm Extensions",
                 "Knee Curl",
                 "Chest Press",
                 "Rope Pulls",

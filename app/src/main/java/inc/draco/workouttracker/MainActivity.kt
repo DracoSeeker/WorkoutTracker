@@ -69,6 +69,9 @@ fun NavHolder(
                 navToHistory = { exercise ->
                     navController.navigate(Screens.History.route)
                     historyVM.exercise = exercise
+                },
+                navToWorkout = {
+                    navController.navigate(Screens.Workout.route)
                 }
             )
         }
@@ -77,6 +80,11 @@ fun NavHolder(
         ) {
             Log.d("TGT", "Recomposing NavHost Exercise Screen")
             HistoryScreen(historyVM = historyVM)
+        }
+        composable(
+            route = Screens.Workout.route
+        ) {
+
         }
     }
 }

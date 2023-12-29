@@ -21,6 +21,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -59,7 +61,11 @@ import inc.draco.workouttracker.viewmodel.ExerciseViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExerciseScreen(exerciseVM: ExerciseViewModel, navToHistory: (Exercise) -> Unit) {
+fun ExerciseScreen(
+    exerciseVM: ExerciseViewModel,
+    navToHistory: (Exercise) -> Unit,
+    navToWorkout: () -> Unit
+) {
 
 //    val exercises by exerciseVM.exercisesFlow.collectAsStateWithLifecycle(initialValue = null)
 
@@ -83,18 +89,29 @@ fun ExerciseScreen(exerciseVM: ExerciseViewModel, navToHistory: (Exercise) -> Un
 
     Scaffold (
         Modifier,
-        topBar = { TopAppBar(
-            title = {
-                Text(
-                    text = "Exercises"
-                )
-            },
-            actions = {
-                IconButton(onClick = { exerciseVM.showAddExercise = true}) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add Exercise")
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Exercises"
+                    )
+                }
+            )
+        },
+        bottomBar = {
+            BottomAppBar (
+            ) {
+                Row (
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    IconButton(onClick = { exerciseVM.showAddExercise = true}) {
+                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Exercise")
+                    }
+                    IconButton(onClick = { navToWorkout() }) {
+                        Icon(imageVector = Icons.Default.Build, contentDescription = "Add Workouts")
+                    }
                 }
             }
-        )
         }
     ) {paddingValues ->
         Surface (
@@ -134,7 +151,7 @@ fun CategoryGrouping(
         Box (
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 30.dp)
+                .padding(start = 15.dp)
         ) {
             Column (
                 Modifier
@@ -162,8 +179,8 @@ fun ExerciseDisplay(exercise: Exercise, workouts: List<Workout>, navToHistory: (
     Card (
         Modifier
             .fillMaxWidth()
-            .combinedClickable (
-                onClick = {navToHistory(exercise)}
+            .combinedClickable(
+                onClick = { navToHistory(exercise) }
             ),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
     ) {
@@ -173,7 +190,7 @@ fun ExerciseDisplay(exercise: Exercise, workouts: List<Workout>, navToHistory: (
                 .padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(text = exercise.type?.titleCase() ?: "Null")
+            Text(text = "${exercise.type?.titleCase() ?: "Null"} ${workouts.size}")
             Row (
                 Modifier
                     .fillMaxWidth()
