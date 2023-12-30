@@ -19,10 +19,12 @@ import androidx.navigation.compose.rememberNavController
 import inc.draco.workouttracker.navigation.Screens
 import inc.draco.workouttracker.ui.ExerciseScreen
 import inc.draco.workouttracker.ui.HistoryScreen
+import inc.draco.workouttracker.ui.WorkoutScreen
 import inc.draco.workouttracker.ui.theme.WorkoutTrackerTheme
 import inc.draco.workouttracker.viewmodel.ExerciseViewModel
 import inc.draco.workouttracker.viewmodel.HistoryViewModel
 import inc.draco.workouttracker.viewmodel.Overseer
+import inc.draco.workouttracker.viewmodel.WorkoutViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,7 +32,10 @@ class MainActivity : ComponentActivity() {
 
         val overseer = Overseer()
         val exerciseVM = ExerciseViewModel(overseer = overseer)
-        val historyVM = HistoryViewModel(overseer, exerciseVM.workouts)
+        val historyVM = HistoryViewModel(overseer)
+        val workoutVM = WorkoutViewModel(overseer)
+
+        timer.start()
 
         setContent {
             WorkoutTrackerTheme {
@@ -38,7 +43,8 @@ class MainActivity : ComponentActivity() {
                     navController = rememberNavController(),
                     overseer = overseer,
                     exerciseVM = exerciseVM,
-                    historyVM = historyVM
+                    historyVM = historyVM,
+                    workoutVM = workoutVM
                 )
             }
         }
@@ -48,13 +54,13 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun NavHolder(
     navController: NavHostController = rememberNavController(),
-    overseer: Overseer = Overseer(),
-    exerciseVM: ExerciseViewModel = ExerciseViewModel(overseer = overseer),
-    historyVM: HistoryViewModel = HistoryViewModel(overseer, exerciseVM.workouts)
+    overseer: Overseer,
+    exerciseVM: ExerciseViewModel,
+    historyVM: HistoryViewModel,
+    workoutVM: WorkoutViewModel
 ) {
 
-    overseer.scope = rememberCoroutineScope()
-    exerciseVM.init()
+    overseer.init(rememberCoroutineScope())
 
     NavHost(
         navController = navController,
@@ -63,12 +69,11 @@ fun NavHolder(
         composable(
             route = Screens.Exercises.route
         ) {
-            Log.d("TGT", "Recomposing NavHost Exercise Screen")
             ExerciseScreen(
                 exerciseVM = exerciseVM,
                 navToHistory = { exercise ->
                     navController.navigate(Screens.History.route)
-                    historyVM.exercise = exercise
+                    historyVM.init(exercise)
                 },
                 navToWorkout = {
                     navController.navigate(Screens.Workout.route)
@@ -78,13 +83,12 @@ fun NavHolder(
         composable(
             route = Screens.History.route
         ) {
-            Log.d("TGT", "Recomposing NavHost Exercise Screen")
             HistoryScreen(historyVM = historyVM)
         }
         composable(
             route = Screens.Workout.route
         ) {
-
+            WorkoutScreen(workoutVM = workoutVM)
         }
     }
 }

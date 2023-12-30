@@ -40,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import inc.draco.workouttracker.log
 import inc.draco.workouttracker.realm.Exercise
 import inc.draco.workouttracker.realm.Workout
 import inc.draco.workouttracker.titleCase
@@ -77,7 +79,7 @@ fun ExerciseScreen(
             onNewExerciseIsBodyweightChange = { exerciseVM.newExerciseIsBodyweight = it },
             onAddExercise = exerciseVM::onAddExercise,
             onDismiss = { exerciseVM.showAddExercise = false },
-            categories = exerciseVM.categories,
+            categories = exerciseVM.overseer.categories,
             newExerciseCategory = exerciseVM.newExerciseCategory,
             onNewExerciseCategoryChanged = { exerciseVM.newExerciseCategory = it },
             newExerciseCustomCategory = exerciseVM.newExerciseCustomCategory,
@@ -123,11 +125,11 @@ fun ExerciseScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                for (category in exerciseVM.categories) {
+                for (category in exerciseVM.overseer.categories) {
                     CategoryGrouping(
                         category = category,
-                        exercises = exerciseVM.exercises,
-                        workouts = exerciseVM.workouts.toMap(),
+                        exercises = exerciseVM.overseer.exercises,
+                        workouts = exerciseVM.overseer.workouts.toMap(),
                         navToHistory = {navToHistory(it)}
                     )
                 }
@@ -140,7 +142,7 @@ fun ExerciseScreen(
 fun CategoryGrouping(
     category: String,
     exercises: List<Exercise>,
-    workouts: Map<String, List<Workout>>,
+    workouts: Map<String, MutableState<List<Workout>>>,
     navToHistory: (Exercise) -> Unit
 ) {
     Column {
@@ -159,11 +161,13 @@ fun CategoryGrouping(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 for (exercise in exercises.filter { it.category == category }) {
-                    ExerciseDisplay(
-                        exercise = exercise,
-                        workouts[exercise.type] ?: emptyList(),
-                        navToHistory = {navToHistory(it)}
-                    )
+                    key(workouts[exercise.type]) {
+                        ExerciseDisplay(
+                            exercise = exercise,
+                            workouts = workouts[exercise.type]?.value ?: emptyList(),
+                            navToHistory = { navToHistory(it) }
+                        )
+                    }
                 }
             }
         }
@@ -190,7 +194,8 @@ fun ExerciseDisplay(exercise: Exercise, workouts: List<Workout>, navToHistory: (
                 .padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(text = "${exercise.type?.titleCase() ?: "Null"} ${workouts.size}")
+            Text(text = "${exercise.type.titleCase()} ${workouts.size}")
+            log("Displaying ${exercise.type.titleCase()}[${workouts.size}]")
             Row (
                 Modifier
                     .fillMaxWidth()

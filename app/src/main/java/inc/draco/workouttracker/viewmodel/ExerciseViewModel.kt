@@ -11,34 +11,34 @@ import androidx.lifecycle.ViewModel
 import inc.draco.workouttracker.realm.Exercise
 import inc.draco.workouttracker.realm.Workout
 
-class ExerciseViewModel(private val overseer: Overseer) : ViewModel() {
-    var exercises by mutableStateOf(emptyList<Exercise>())
-        private set
-
-    var workouts = mutableStateMapOf<String,List<Workout>>()
-        private set
-
-    var categories by mutableStateOf(emptyList<String>())
+class ExerciseViewModel(val overseer: Overseer) : ViewModel() {
+//    var exercises by mutableStateOf(emptyList<Exercise>())
+//        private set
+//
+//    var workouts = mutableStateMapOf<String,List<Workout>>()
+//        private set
+//
+//    var categories by mutableStateOf(emptyList<String>())
 
     init{
         Log.d("TGT", "Initializing Exercise View Model")
     }
 
-    fun init() {
-        overseer.getExercises {
-            exerciseList ->
-            exercises = exerciseList.sortedBy { exercise -> exercise.type }
-            Log.d("TGT", "Updating Exercises[${exercises.size}]")
-        }
-        Log.d("TGT", "At Init Exercises[${exercises.size}]")
-        for (exercise in exercises) {
-            overseer.getWorkoutsOfExercise(exercise) {
-                workoutsOfExercise -> workouts[exercise.type] = workoutsOfExercise
-                Log.d("TGT", "${exercise.type}[${workoutsOfExercise.size}] updated")
-            }
-        }
-        overseer.getExerciseCategories { categories = it.toList() }
-    }
+//    fun init() {
+//        overseer.getExercises {
+//            exerciseList ->
+//            exercises = exerciseList.sortedBy { exercise -> exercise.type }
+//            Log.d("TGT", "Updating Exercises[${exercises.size}]")
+//        }
+//        Log.d("TGT", "At Init Exercises[${exercises.size}]")
+//        for (exercise in exercises) {
+//            overseer.getWorkoutsOfExercise(exercise) {
+//                workoutsOfExercise -> workouts[exercise.type] = workoutsOfExercise
+//                Log.d("TGT", "${exercise.type}[${workoutsOfExercise.size}] updated")
+//            }
+//        }
+//        overseer.getExerciseCategories { categories = it.toList() }
+//    }
 
     var showAddExercise by mutableStateOf(false)
     var newExerciseType by mutableStateOf("")
@@ -64,9 +64,9 @@ class ExerciseViewModel(private val overseer: Overseer) : ViewModel() {
             newCategory = newCategory,
             onException = {}
         )
-        overseer.getWorkoutsOfExercise(exercise) {
-            workouts[exercise.type] = it
-        }
+//        overseer.getWorkoutsOfExercise(exercise) {
+//            workouts[exercise.type] = it
+//        }
 
         newExerciseType = ""
         newExerciseIsBodyweight = false
