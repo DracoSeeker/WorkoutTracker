@@ -216,7 +216,7 @@ fun ExerciseDisplay(exercise: Exercise, workouts: List<Workout>, navToHistory: (
                         .border(1.dp, Color.Black),
                     contentAlignment = Alignment.Center
                 ){
-                    Text(text = "Graph Goes Here") /*TODO*/
+                    Text(text = "Graph Goes Here!!") /*TODO*/
                 }
             }
         }
